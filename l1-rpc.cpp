@@ -65,13 +65,12 @@ using namespace ch_frb_io;
 
  */
 
-
 /*
 // For debugging, convert a zmq message to a string
 static string msg_string(zmq::message_t &msg) {
     return string(static_cast<const char*>(msg.data()), msg.size());
 }
- */
+*/
 
 // RPC requests to write assembled_chunks to disk are stored in this
 // struct.  (this is used to queue requests *within* the RPC server --
@@ -265,6 +264,7 @@ void L1RpcServer::set_writechunk_status(string filename,
     {
         ulock u(_status_mutex);
         _write_chunk_status[filename] = make_pair(status, error_message);
+	chlog("Set writechunk status for " << filename << " to " << status);
     }
 }
 
@@ -471,6 +471,7 @@ int L1RpcServer::_handle_request(zmq::message_t* client, zmq::message_t* request
     uint32_t token = rpcreq.token;
 
     //chlog("Received RPC request for function: '" << funcname << "'");
+    //from client '" << msg_string(*client) << "'");
 
     if (funcname == "shutdown") {
         chlog("Shutdown requested.");
@@ -503,7 +504,7 @@ int L1RpcServer::_handle_request(zmq::message_t* client, zmq::message_t* request
             // read and parse /proc/stat, add to stats[0].
             ifstream s("/proc/stat");
             string key;
-            int arrayi;
+            int arrayi = 0;
 
             double dt = time_diff(_time0, get_time());
             // /proc/stat values are in "jiffies"?
@@ -671,6 +672,13 @@ int L1RpcServer::_handle_request(zmq::message_t* client, zmq::message_t* request
         string error_message;
         {
             ulock u(_status_mutex);
+
+	    // DEBUG
+	    chdebug("Request for status of " << pathname);
+	    for (auto it=_write_chunk_status.begin(); it!=_write_chunk_status.end(); it++) {
+	      chdebug("status[" << it->first << "] = " << it->second.first << ((it->first == pathname) ? " ***" : ""));
+	    }
+
             auto val = _write_chunk_status.find(pathname);
             if (val == _write_chunk_status.end()) {
                 status = "UNKNOWN";
@@ -717,6 +725,8 @@ void L1RpcServer::_add_write_request(write_chunk_request* req) {
 
     ulock u(_q_mutex);
 
+    chdebug("Add_write_request for filename " << req->filename);
+
     // Highest priority goes at the front of the queue.
     // Search for the first element with priority lower than this one's.
     // AND search for a higher-priority duplicate of this element.
@@ -724,12 +734,14 @@ void L1RpcServer::_add_write_request(write_chunk_request* req) {
     for (it = _write_reqs.begin(); it != _write_reqs.end(); it++) {
         if (((*it)->chunk == req->chunk) &&
             ((*it)->filename == req->filename)) {
-            //cout << "Found an existing write request for chunk: beam " << req->chunk->beam_id << ", ichunk " << req->chunk->ichunk << " with >= priority" << endl;
-            // Found a higher-priority existing entry -- add this request's clients to the existing one.
-            (*it)->clients.insert((*it)->clients.end(), req->clients.begin(), req->clients.end());
+	  chdebug("Found an existing write request for chunk: beam " << req->chunk->beam_id
+		<< ", ichunk " << req->chunk->ichunk << " with >= priority " << (*it)->chunk
+		<< " and filename " << req->filename);
+	  // Found a higher-priority existing entry -- add this request's clients to the existing one.
+	  (*it)->clients.insert((*it)->clients.end(), req->clients.begin(), req->clients.end());
  
-            u.unlock();
-            return;
+	  u.unlock();
+	  return;
         }
         if ((*it)->priority < req->priority)
             // Found where we should insert this request!
@@ -747,8 +759,9 @@ void L1RpcServer::_add_write_request(write_chunk_request* req) {
 
     // Iterate up to the chunk we just inserted.
     for (it = _write_reqs.begin(); it != _write_reqs.end(); it++)
-        if ((*it)->chunk == req->chunk)
-            break;
+      if (((*it)->chunk == req->chunk) &&
+	  ((*it)->filename == req->filename))
+	break;
     // Remember where the newly-inserted request is, because if we
     // find another request for the same chunk but lower priority,
     // we'll append clients.
@@ -756,8 +769,9 @@ void L1RpcServer::_add_write_request(write_chunk_request* req) {
 
     it++;
     for (; it != _write_reqs.end(); it++) {
-        if ((*it)->chunk == req->chunk) {
-            //cout << "Found existing write request for this chunk with priority " << it->priority << " vs " << req->priority << endl;
+        if (((*it)->chunk == req->chunk) &&
+            ((*it)->filename == req->filename)) {
+	  chdebug("Found existing write request for this chunk (filename " << req->filename << ") with priority " << (*it)->priority << " vs " << req->priority);
             // Before deleting the lower-priority entry, copy its clients.
             (*newreq)->clients.insert((*newreq)->clients.end(), (*it)->clients.begin(), (*it)->clients.end());
             // Delete the lower-priority one.
@@ -770,16 +784,10 @@ void L1RpcServer::_add_write_request(write_chunk_request* req) {
         }
     }
 
-    /*
-     cout << "Added write request: now " << _write_reqs.size() << " queued" << endl;
-     cout << "Queue:" << endl;
-     for (it = _write_reqs.begin(); it != _write_reqs.end(); it++) {
-     cout << "  priority " << it->priority << ", chunk " << *(it->chunk) << ", clients [";
-     for (auto it2 = it->clients.begin(); it2 != it->clients.end(); it2++)
-     cout << " " << msg_string(**it2);
-     cout << " ]" << endl;
-     }
-     */
+    chdebug("Added write request: now " << _write_reqs.size() << " queued:");
+    for (it = _write_reqs.begin(); it != _write_reqs.end(); it++) {
+      chdebug("  priority " << (*it)->priority << ", filename " << (*it)->filename);
+    }
 
     u.unlock();
 

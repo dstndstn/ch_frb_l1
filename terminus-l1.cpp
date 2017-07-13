@@ -285,7 +285,6 @@ int main(int argc, char **argv) {
 
     // This won't happen (we're ignoring end-of-stream packets)
     instream->join_threads();
-
     
 }
 

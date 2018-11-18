@@ -10,7 +10,7 @@ jobs:
           command: cat /proc/cpuinfo
       - run:
           name: Ubuntu packages
-          command: apt update && apt install -y liblz4-dev libyaml-cpp-dev libboost-dev libjsoncpp-dev python-numpy libfftw3-dev libhdf5-serial-dev libzmq3-dev
+          command: apt update && apt install -y liblz4-dev libyaml-cpp-dev libboost-dev libjsoncpp-dev python-numpy libfftw3-dev libhdf5-serial-dev libzmq3-dev python-pip git g++ make
       - run:
           name: Pip packages
           command: pip2 install cpp-coveralls Cython pyzmq msgpack-python

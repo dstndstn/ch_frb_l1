@@ -116,7 +116,14 @@ endif
 
 ifeq ($(HAVE_HDF5),y)
 	CPP += -DHAVE_HDF5
+
+	CPP_LFLAGS := $(subst -lhdf5,-lhdf5_cpp -lhdf5,$(CPP_LFLAGS))
+
 endif
+#CPP_LFLAGS += -lhdf5_cpp -lhdf5
+# FIXME pkg-config for hdf5 only prints "-lhdf5", not "-lhdf5_cpp -lhdf5", hence the above.
+
+@info
 
 ifeq ($(HAVE_JSONCPP),y)
 	CPP += -DHAVE_JSONCPP
@@ -182,7 +189,7 @@ bonsai-nanny: bonsai-nanny.cpp
 	$(CPP) -o $@ $<
 
 bonsai-show-config: bonsai-show-config.cpp $(INCFILES) libbonsai.so
-	$(CPP) -o $@ $< -lbonsai -lrf_kernels $(CPP_LFLAGS)
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
 
 bonsai-time-dedisperser: bonsai-time-dedisperser.cpp $(INCFILES) libbonsai.so
 	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)

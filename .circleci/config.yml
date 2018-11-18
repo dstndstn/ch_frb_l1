@@ -63,17 +63,19 @@ jobs:
             git clone https://github.com/kmsmith137/simd_helpers.git
             cd simd_helpers
             ln -s site/Makefile.local.norootprivs Makefile.local
+            make -j4
             make install
             cd $BASE
             git clone https://github.com/kmsmith137/simpulse.git
             cd simpulse
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
-            make
+            make -j4
             make install
             cd $BASE
             git clone https://github.com/kmsmith137/sp_hdf5.git
             cd sp_hdf5
             ln -s site/Makefile.local.linux Makefile.local
+            make -j4
             make install
             cd
       - run:

@@ -16,7 +16,7 @@ jobs:
           command: pip2 install cpp-coveralls Cython pyzmq msgpack-python
       - run:
           name: msgpack
-          command |
+          command: |
             cd
             wget https://github.com/msgpack/msgpack-c/releases/download/cpp-2.1.0/msgpack-2.1.0.tar.gz
             tar xzf msgpack-2.1.0.tar.gz

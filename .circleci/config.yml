@@ -45,6 +45,11 @@ jobs:
             pwd
             wget https://github.com/msgpack/msgpack-c/releases/download/cpp-2.1.0/msgpack-2.1.0.tar.gz
             tar xvzf msgpack-2.1.0.tar.gz
+            ls msgpack-2.1.0/include || true
+            ls /root/project/msgpack-2.1.0/include || true
+            ls ${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include || true
+            ls ~/project/msgpack-2.1.0/include || true
+
       - run:
           name: simd_helpers, simpulse, sp_hdf5
           command: |

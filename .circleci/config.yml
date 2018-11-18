@@ -20,8 +20,6 @@ jobs:
             cd
             wget https://github.com/msgpack/msgpack-c/releases/download/cpp-2.1.0/msgpack-2.1.0.tar.gz
             tar xzf msgpack-2.1.0.tar.gz
-            export MSGPACK_INC_DIR=$(pwd)/msgpack-2.1.0/include
-
       - run:
           name: ch_frb_io
           command: |
@@ -38,6 +36,7 @@ jobs:
             export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages
             export HDF5_INC_DIR=/usr/include/hdf5/serial
             export HDF5_LIB_DIR=/usr/lib/x86_64-linux-gnu/hdf5/serial
+            export MSGPACK_INC_DIR=$(pwd)/msgpack-2.1.0/include
             cd
             pwd
             git clone https://github.com/CHIMEFRB/ch_frb_io.git

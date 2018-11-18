@@ -40,6 +40,7 @@ jobs:
             pwd
             git clone https://github.com/CHIMEFRB/ch_frb_io.git
             cd ch_frb_io
-            ln -s site/Makefile.local.travis Makefile.local
+            git checkout circleci
+            ln -s site/Makefile.local.frb-compute-0 Makefile.local
             make
             make install

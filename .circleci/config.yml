@@ -131,5 +131,11 @@ jobs:
             cd rf_pipelines
             git checkout circleci
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
-            make -j4
+            make #-j4
+            make install
+      - run:
+          name: ch_frb_l1
+          command: |
+            ln -s site/Makefile.local.frb-compute-0 Makefile.local
+            make #-j4
             make install

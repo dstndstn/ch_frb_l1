@@ -42,6 +42,7 @@ jobs:
       - run:
           name: simd_helpers, simpulse, sp_hdf5
           command: |
+            set
             export BASE=$(pwd)
             cd $BASE
             git clone https://github.com/kmsmith137/simd_helpers.git
@@ -51,7 +52,7 @@ jobs:
             cd $BASE
             git clone https://github.com/kmsmith137/simpulse.git
             cd simpulse
-            ln -s site/Makefile.local.travis Makefile.local
+            ln -s site/Makefile.local.frb-compute-0 Makefile.local
             make
             make install
             cd $BASE

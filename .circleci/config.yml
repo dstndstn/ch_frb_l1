@@ -50,7 +50,6 @@ jobs:
             ln -s site/Makefile.local.linux Makefile.local
             make install
             cd
-            mv include/* chime/include/
       - run:
           name: ch_frb_io
           command: |

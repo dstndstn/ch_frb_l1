@@ -32,10 +32,11 @@ jobs:
       - run:
           name: Setup Environment Variables
           command: |
+            echo "export BASE=${CIRCLE_WORKING_DIRECTORY}" >> $BASH_ENV
             echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIBDIR}" >> $BASH_ENV
             echo "export NUMPY_INCDIR=$(python -c 'import numpy; print(numpy.get_include())')" >> $BASH_ENV
             echo "export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages" >> $BASH_ENV
-            echo "export MSGPACK_CFLAGS=-I${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include" >> $BASH_ENV
+            echo "export MSGPACK_CFLAGS=-I${BASE}/msgpack-2.1.0/include" >> $BASH_ENV
             echo "export MSGPACK_LFLAGS=" >> $BASH_ENV
             echo "BASH ENV:"
             cat $BASH_ENV
@@ -44,7 +45,7 @@ jobs:
           command: |
             pwd
             wget https://github.com/msgpack/msgpack-c/releases/download/cpp-2.1.0/msgpack-2.1.0.tar.gz
-            tar xvzf msgpack-2.1.0.tar.gz
+            tar xzf msgpack-2.1.0.tar.gz
             ls msgpack-2.1.0/include || true
             ls /root/project/msgpack-2.1.0/include || true
             ls ${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include || true
@@ -55,7 +56,6 @@ jobs:
           command: |
             set
             env
-            export BASE=$(pwd)
             cd $BASE
             git clone https://github.com/kmsmith137/simd_helpers.git
             cd simd_helpers
@@ -77,7 +77,7 @@ jobs:
           name: ch_frb_io
           command: |
             pwd
-            ls ${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include || true
+            ls ${BASE}/msgpack-2.1.0/include || true
             git clone https://github.com/CHIMEFRB/ch_frb_io.git
             cd ch_frb_io
             git checkout circleci

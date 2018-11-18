@@ -16,7 +16,6 @@ jobs:
       HAVE_JSONCPP: y
       PYDIR: ~/chime/lib/python2.7/site-packages
       PYTHON_INCDIR: /usr/include/python2.7
-      MSGPACK_LFLAGS: 
 
     steps:
       - checkout
@@ -33,11 +32,13 @@ jobs:
       - run:
           name: Setup Environment Variables
           command: |
-            echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIBDIR}' >> $BASH_ENV
-            echo 'export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")' >> $BASH_ENV
-            echo 'export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages' >> $BASH_ENV
-            echo 'export MSGPACK_CFLAGS=-I${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include' >> $BASH_ENV
-
+            echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIBDIR}" >> $BASH_ENV
+            echo "export NUMPY_INCDIR=$(python -c 'import numpy; print(numpy.get_include())')" >> $BASH_ENV
+            echo "export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages" >> $BASH_ENV
+            echo "export MSGPACK_CFLAGS=-I${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include" >> $BASH_ENV
+            echo "export MSGPACK_LFLAGS=" >> $BASH_ENV
+            echo "BASH ENV:"
+            cat $BASH_ENV
       - run:
           name: msgpack
           command: |
@@ -71,6 +72,7 @@ jobs:
           name: ch_frb_io
           command: |
             pwd
+            ls ${CIRCLE_WORKING_DIRECTORY}/msgack-2.1.0/include
             git clone https://github.com/CHIMEFRB/ch_frb_io.git
             cd ch_frb_io
             git checkout circleci

@@ -7,7 +7,6 @@ jobs:
       LIBDIR: ~/chime/lib
       INCDIR: ~/chime/include
       BINDIR: ~/chime/bin
-      LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}:${LIBDIR}
       HAVE_PSRFITS: n
       HAVE_HDF5: y
       HAVE_CH_FRB_IO: y
@@ -17,9 +16,6 @@ jobs:
       HAVE_JSONCPP: y
       PYDIR: ~/chime/lib/python2.7/site-packages
       PYTHON_INCDIR: /usr/include/python2.7
-      NUMPY_INCDIR: $(python -c "import numpy; print(numpy.get_include())")
-      PYTHONPATH: ${PYTHONPATH}:/usr/lib/python2.7/dist-packages
-      MSGPACK_CFLAGS: -I${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include
       MSGPACK_LFLAGS: 
 
     steps:
@@ -33,6 +29,15 @@ jobs:
       - run:
           name: Pip packages
           command: pip2 install cpp-coveralls Cython pyzmq msgpack-python
+
+      - run:
+        name: Setup Environment Variables
+        command: |
+          echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIBDIR}' >> $BASH_ENV
+          echo 'export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")' >> $BASH_ENV
+          echo 'export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages' >> $BASH_ENV
+          echo 'export MSGPACK_CFLAGS=-I${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include' >> $BASH_ENV
+
       - run:
           name: msgpack
           command: |
@@ -43,6 +48,7 @@ jobs:
           name: simd_helpers, simpulse, sp_hdf5
           command: |
             set
+            env
             export BASE=$(pwd)
             cd $BASE
             git clone https://github.com/kmsmith137/simd_helpers.git

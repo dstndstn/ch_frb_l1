@@ -105,6 +105,6 @@ jobs:
             pwd
             wget -O bonsai.tgz http://broiler.astrometry.net/~dstn/temp/bonsai-circleci-2018-11-18.tgz
             tar xzf bonsai.tgz
-            ln -s site/Makefile.local.travis Makefile.local
+            ln -s site/Makefile.local.frb-compute-0 Makefile.local
             make
             make install

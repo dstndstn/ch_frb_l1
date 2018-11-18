@@ -3,6 +3,25 @@ jobs:
   build:
     docker:
       - image: ubuntu:xenial
+    environment:
+      LIBDIR: ~/chime/lib
+      INCDIR: ~/chime/include
+      BINDIR: ~/chime/bin
+      LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}:${LIBDIR}
+      HAVE_PSRFITS: n
+      HAVE_HDF5: y
+      HAVE_CH_FRB_IO: y
+      HAVE_BONSAI: y
+      HAVE_SIMPULSE: y
+      HAVE_PNG: y
+      HAVE_JSONCPP: y
+      PYDIR: ~/chime/lib/python2.7/site-packages
+      PYTHON_INCDIR: /usr/include/python2.7
+      NUMPY_INCDIR: $(python -c "import numpy; print(numpy.get_include())")
+      PYTHONPATH: ${PYTHONPATH}:/usr/lib/python2.7/dist-packages
+      MSGPACK_CFLAGS: -I$(pwd)/msgpack-2.1.0/include
+      MSGPACK_LFLAGS: 
+
     steps:
       - checkout
       - run:
@@ -23,15 +42,6 @@ jobs:
       - run:
           name: simd_helpers, simpulse, sp_hdf5
           command: |
-            export LIBDIR=~/chime/lib
-            export INCDIR=~/chime/include
-            export BINDIR=~/chime/bin
-            export HAVE_PSRFITS=n
-            export HAVE_CH_FRB_IO=y
-            export HAVE_BONSAI=y
-            export PYDIR=~/chime/lib/python2.7/site-packages
-            export PYTHON_INCDIR=/usr/include/python2.7
-            export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")
             export BASE=$(pwd)
             cd $BASE
             git clone https://github.com/kmsmith137/simd_helpers.git
@@ -53,21 +63,6 @@ jobs:
       - run:
           name: ch_frb_io
           command: |
-            export LIBDIR=~/chime/lib
-            export INCDIR=~/chime/include
-            export BINDIR=~/chime/bin
-            export HAVE_PSRFITS=n
-            export HAVE_CH_FRB_IO=y
-            export HAVE_BONSAI=y
-            export PYDIR=~/chime/lib/python2.7/site-packages
-            export PYTHON_INCDIR=/usr/include/python2.7
-            export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")
-            #export JSONCPP_INC_DIR=/usr/include/jsoncpp
-            export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages
-            #export HDF5_INC_DIR=/usr/include/hdf5/serial
-            #export HDF5_LIB_DIR=/usr/lib/x86_64-linux-gnu/hdf5/serial
-            export MSGPACK_CFLAGS=-I$(pwd)/msgpack-2.1.0/include
-            export MSGPACK_LFLAGS=
             pwd
             git clone https://github.com/CHIMEFRB/ch_frb_io.git
             cd ch_frb_io
@@ -78,9 +73,6 @@ jobs:
       - run:
           name: rf_kernels
           command: |
-            export LIBDIR=~/chime/lib
-            export INCDIR=~/chime/include
-            export BINDIR=~/chime/bin
             cd
             git clone https://github.com/kmsmith137/rf_kernels.git
             cd rf_kernels
@@ -90,23 +82,14 @@ jobs:
       - run:
           name: bonsai
           command: |
-            export LIBDIR=~/chime/lib
-            export INCDIR=~/chime/include
-            export BINDIR=~/chime/bin
-            export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIBDIR}
-            export HAVE_PSRFITS=n
-            export HAVE_CH_FRB_IO=y
-            export HAVE_BONSAI=y
-            export PYDIR=~/chime/lib/python2.7/site-packages
-            export PYTHON_INCDIR=/usr/include/python2.7
-            export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")
-            export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages
             pwd
             wget -O bonsai.tgz http://broiler.astrometry.net/~dstn/temp/bonsai-circleci-2018-11-18.tgz
             tar xzf bonsai.tgz
             cd bonsai
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
             ###
+            echo CIRCLE_WORKING_DIRECTORY: ${CIRCLE_WORKING_DIRECTORY}
+            ls ${CIRCLE_WORKING_DIRECTORY}
             cp ${CIRCLE_WORKING_DIRECTORY}/bonsai-Makefile Makefile
             ###
             make #-j4
@@ -114,19 +97,6 @@ jobs:
       - run:
           name: rf_pipelines
           command: |
-            export LIBDIR=~/chime/lib
-            export INCDIR=~/chime/include
-            export BINDIR=~/chime/bin
-            export HAVE_PSRFITS=n
-            export HAVE_CH_FRB_IO=y
-            export HAVE_BONSAI=y
-            export HAVE_HDF5=y
-            export PYDIR=~/chime/lib/python2.7/site-packages
-            export PYTHON_INCDIR=/usr/include/python2.7
-            export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")
-            export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages
-            #export MSGPACK_CFLAGS=-I$(pwd)/msgpack-2.1.0/include
-            #export MSGPACK_LFLAGS=
             pwd
             git clone https://github.com/kmsmith137/rf_pipelines.git
             cd rf_pipelines

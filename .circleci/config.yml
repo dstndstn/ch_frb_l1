@@ -44,7 +44,7 @@ jobs:
           command: |
             pwd
             wget https://github.com/msgpack/msgpack-c/releases/download/cpp-2.1.0/msgpack-2.1.0.tar.gz
-            tar xzf msgpack-2.1.0.tar.gz
+            tar xvzf msgpack-2.1.0.tar.gz
       - run:
           name: simd_helpers, simpulse, sp_hdf5
           command: |
@@ -72,7 +72,7 @@ jobs:
           name: ch_frb_io
           command: |
             pwd
-            ls ${CIRCLE_WORKING_DIRECTORY}/msgack-2.1.0/include
+            ls ${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include || true
             git clone https://github.com/CHIMEFRB/ch_frb_io.git
             cd ch_frb_io
             git checkout circleci

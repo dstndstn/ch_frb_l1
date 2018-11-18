@@ -7,10 +7,29 @@ BINDIR ?= $(HOME)/bin
 LIBDIR ?= $(HOME)/lib
 INCDIR ?= $(HOME)/include
 
+HDF5_CFLAGS ?= $(shell pkg-config --cflags hdf5)
+HDF5_LFLAGS ?= $(shell pkg-config --libs   hdf5)
+HDF5_LFLAGS := $(subst -lhdf5,-lhdf5_cpp -lhdf5,$(HDF5_LFLAGS))
+
+MSGPACK_CFLAGS ?= $(shell pkg-config --cflags msgpack)
+MSGPACK_LFLAGS ?= $(shell pkg-config --libs   msgpack)
+
+ZMQ_CFLAGS ?= $(shell pkg-config --cflags libzmq)
+ZMQ_LFLAGS ?= $(shell pkg-config --libs   libzmq)
+
+JSON_CFLAGS ?= $(shell pkg-config --cflags jsoncpp)
+JSON_LFLAGS ?= $(shell pkg-config --libs   jsoncpp)
+
 # Read-only location of python header files
-PYTHON_INCDIR=/usr/include/python2.7
-NUMPY_INCDIR=/usr/lib64/python2.7/site-packages/numpy/core/include
-JSONCPP_INCDIR=/usr/include/jsoncpp
+#PYTHON_INCDIR=/usr/include/python2.7
+#JSONCPP_INCDIR=/usr/include/jsoncpp
+
+NUMPY_INCDIR ?= /usr/lib64/python2.7/site-packages/numpy/core/include
+
+PYTHON_CFLAGS ?= $(shell pkg-config --cflags python)
+PYTHON_LFLAGS ?= $(shell pkg-config --libs   python)
+
+PYTHON_CFLAGS += -I$(NUMPY_INCDIR)
 
 #
 # C++ command line
@@ -24,12 +43,12 @@ else
      CPP=g++ -std=c++11 -pthread -fPIC -march=native -Wall -O0 -g -ffast-math -funroll-loops
 endif
 
-CPP += -I. -I$(INCDIR) -I$(PYTHON_INCDIR) -I$(NUMPY_INCDIR) -I$(JSONCPP_INCDIR)
+CPP += -I. -I$(INCDIR) $(PYTHON_CFLAGS) $(JSON_CFLAGS) $(ZMQ_CFLAGS) $(MSGPACK_CFLAGS) $(HDF5_CFLAGS)
 
 # Any C++ flags which should only be specified when linking 
 # Don't forget to put -L. and -L$(LIBDIR) on the command line (in this order)
 # Don't forget to add . and $(LIBDIR) in your LD_LIBRARY_PATH environment variable (in this order)
-CPP_LFLAGS=-L. -L$(LIBDIR)
+CPP_LFLAGS=-L. -L$(LIBDIR) $(PYTHON_LFLAGS) $(JSON_LFLAGS) $(ZMQ_LFLAGS) $(MSGPACK_LFLAGS) $(HDF5_LFLAGS)
 
 # We use the C (not C++) compiler only once: to compile civetweb/civetweb.o.
 CC=gcc -pthread -fPIC -Wall -O3 -march=native -ffast-math -funroll-loops -I. -I/usr/include/jsoncpp -I$(INCDIR)

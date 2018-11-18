@@ -55,7 +55,7 @@ jobs:
             ls ~/project/msgpack-2.1.0/include || true
 
       - run:
-          name: simd_helpers, simpulse, sp_hdf5
+          name: simd_helpers, simpulse, sp_hdf5, pyclops
           command: |
             set
             env
@@ -77,7 +77,13 @@ jobs:
             ln -s site/Makefile.local.linux Makefile.local
             #make -j4
             make install
-            cd
+            cd $BASE
+            git clone https://github.com/kmsmith137/pyclops.git
+            cd pyclops
+            ## FIXME
+            ln -s ../simpulse/site/Makefile.local.frb-compute-0 Makefile.local
+            #make -j4
+            make install
       - run:
           name: ch_frb_io
           command: |

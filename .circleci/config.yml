@@ -36,7 +36,7 @@ jobs:
             echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIBDIR}" >> $BASH_ENV
             echo "export NUMPY_INCDIR=$(python -c 'import numpy; print(numpy.get_include())')" >> $BASH_ENV
             echo "export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages" >> $BASH_ENV
-            echo "export MSGPACK_CFLAGS=-I${BASE}/msgpack-2.1.0/include" >> $BASH_ENV
+            echo 'export MSGPACK_CFLAGS=-I${BASE}/msgpack-2.1.0/include' >> $BASH_ENV
             echo "export MSGPACK_LFLAGS=" >> $BASH_ENV
             echo "BASH ENV:"
             cat $BASH_ENV

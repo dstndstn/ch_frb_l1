@@ -100,11 +100,33 @@ jobs:
             export PYTHON_INCDIR=/usr/include/python2.7
             export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")
             export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages
-            export MSGPACK_CFLAGS=-I$(pwd)/msgpack-2.1.0/include
-            export MSGPACK_LFLAGS=
             pwd
             wget -O bonsai.tgz http://broiler.astrometry.net/~dstn/temp/bonsai-circleci-2018-11-18.tgz
             tar xzf bonsai.tgz
+            cd bonsai
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
-            make
+            make -j4
+            make install
+      - run:
+          name: rf_pipelines
+          command: |
+            export LIBDIR=~/chime/lib
+            export INCDIR=~/chime/include
+            export BINDIR=~/chime/bin
+            export HAVE_PSRFITS=n
+            export HAVE_CH_FRB_IO=y
+            export HAVE_BONSAI=y
+            export HAVE_HDF5=y
+            export PYDIR=~/chime/lib/python2.7/site-packages
+            export PYTHON_INCDIR=/usr/include/python2.7
+            export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")
+            export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages
+            #export MSGPACK_CFLAGS=-I$(pwd)/msgpack-2.1.0/include
+            #export MSGPACK_LFLAGS=
+            pwd
+            git clone https://github.com/kmsmith137/rf_pipelines.git
+            cd rf_pipelines
+            git checkout circleci
+            ln -s site/Makefile.local.frb-compute-0 Makefile.local
+            make -j4
             make install

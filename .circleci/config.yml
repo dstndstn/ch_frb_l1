@@ -102,9 +102,11 @@ jobs:
             cd bonsai
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
             ###
-            echo CIRCLE_WORKING_DIRECTORY: ${CIRCLE_WORKING_DIRECTORY}
-            ls ${CIRCLE_WORKING_DIRECTORY}
-            cp ${CIRCLE_WORKING_DIRECTORY}/bonsai-Makefile Makefile
+            #echo CIRCLE_WORKING_DIRECTORY: ${CIRCLE_WORKING_DIRECTORY}
+            #ls ${CIRCLE_WORKING_DIRECTORY}
+            #cp ${CIRCLE_WORKING_DIRECTORY}/bonsai-Makefile Makefile
+            ls ${BASE} || true
+            cp ${BASE}/bonsai-Makefile Makefile
             ###
             make #-j4
             make install

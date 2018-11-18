@@ -37,6 +37,7 @@ jobs:
             #export HDF5_INC_DIR=/usr/include/hdf5/serial
             #export HDF5_LIB_DIR=/usr/lib/x86_64-linux-gnu/hdf5/serial
             export MSGPACK_CFLAGS=-I$(pwd)/msgpack-2.1.0/include
+            export MSGPACK_LFLAGS=
             pwd
             git clone https://github.com/CHIMEFRB/ch_frb_io.git
             cd ch_frb_io
@@ -44,3 +45,25 @@ jobs:
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
             make
             make install
+      - run:
+          name: bonsai
+          command: |
+            export LIBDIR=~/chime/lib
+            export INCDIR=~/chime/include
+            export BINDIR=~/chime/bin
+            export HAVE_PSRFITS=n
+            export HAVE_CH_FRB_IO=y
+            export HAVE_BONSAI=y
+            export PYDIR=~/chime/lib/python2.7/site-packages
+            export PYTHON_INCDIR=/usr/include/python2.7
+            export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")
+            export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages
+            export MSGPACK_CFLAGS=-I$(pwd)/msgpack-2.1.0/include
+            export MSGPACK_LFLAGS=
+            pwd
+            wget -O bonsai.tgz http://broiler.astrometry.net/~dstn/temp/bonsai-2018-11-18.tgz
+            tar xzf bonsai.tgz
+            ln -s site/Makefile.local.travis Makefile.local
+            make
+            make install
+wget 

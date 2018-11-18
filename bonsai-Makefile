@@ -1,0 +1,230 @@
+# The bonsai Makefile assumes the existence of a file `Makefile.local` which defines
+# a few machine-dependent Makefile variables (see list below).
+#
+# Rather than write a Makefile.local from scratch, I recommend that you start with one of the
+# examples in the site/ directory, which contains Makefile.locals for a few frequently-used
+# CHIME machines.  In particular, site/Makefile.local.kms_laptop16 is a recent osx machine,
+# and site/Makefile.local.frb1 is a recent CentOS Linux machine.  (If you're a member of
+# CHIME and you're using one of these machines, you can just symlink the appropriate file in
+# site/ to ./Makefile.local)
+#
+# The complete list of variables which must be defined is:
+#
+#  BINDIR         Installation directory for executables, should be in your $PATH (I usually use $HOME/bin)
+#  LIBDIR         Installation directory for C++ libraries (I usually use $HOME/lib)
+#  INCDIR         Installation directory for C++ headers (I usually use $HOME/include)
+#  PYDIR          Installation directory for python modules, should be in your $PYTHONPATH
+#  CPP            C++ compiler executable, including compiler flags
+#  HAVE_HDF5      Set to 'y' if you have libhdf5, libhdf5_cpp, and sp_hdf5 (https://github.com/kmsmith137/sp_hdf5) installed
+#  HAVE_PNG       Set to 'y' if you have libpng installed
+#  HAVE_SIMPULSE  Set to 'y' if you have simpulse (https://github.com/kmsmith137/simpulse) installed, including its prerequisite FFTW3.
+#  HAVE_JSONCPP   Set to 'y' if you have jsoncpp installed.
+#
+# Some optional variables which I only use for osx/clang:
+#
+#  CPP_LFLAGS     Extra linker flags when creating a .so or executable file from .o files
+#  LIBS_PYMODULE  Any extra libraries needed to link a python extension module (osx needs -lPython)
+#
+# If you have trouble getting bonsai to build/work, then the problem probably has
+# something to do with your compiler flags (specified as part of CPP) or environment 
+# variables.  For a few hints, see README.md (under "INSTALLATION").
+
+include Makefile.local
+
+ifndef CPP
+$(error Fatal: Either Makefile.local does not exist, or it does not define the CPP variable)
+endif
+
+ifndef BINDIR
+$(error Fatal: Either Makefile.local does not exist, or it does not define the BINDIR variable)
+endif
+
+ifndef INCDIR
+$(error Fatal: Makefile.local must define INCDIR variable)
+endif
+
+ifndef LIBDIR
+$(error Fatal: Makefile.local must define LIBDIR variable)
+endif
+
+ifndef PYDIR
+$(error Fatal: Makefile.local must define PYDIR variable)
+endif
+
+INCFILES=bonsai.hpp bonsai_inlines.hpp bonsai_internals.hpp bonsai_kernels.hpp bonsai_kernels128.hpp bonsai_kernels256.hpp
+LIBFILES=libbonsai.so
+UNIT_TESTS_CPP=test-kernels test-misc test-itree test-incbuf test-ftree-transforms test-tree test-sparse-dedispersion
+UNIT_TESTS_PYTHON=test-dedispersion.py
+INSTALLED_BINARIES=bonsai-show-config bonsai-time-dedisperser bonsai-mkweight bonsai-nanny
+NON_INSTALLED_BINARIES=time-transforms time-gridding show-running-variance-estimates
+CYTHON_MODULE=python/bonsai/libbonsai_wrapper.so
+CYTHON_CPPFILES=python/bonsai/libbonsai_wrapper.cpp python/bonsai/bonsai_cython_layer.cpp
+CYTHON_INCFILE=python/bonsai/bonsai_cython_layer.hpp
+PYMODULES=python/bonsai/__init__.py
+SCRIPTS=bonsai-plot-triggers.py bonsai-compare-triggers.py
+LIBS=-lrf_kernels
+LIBSIMPULSE=
+
+OFILES=bit_reverse.o \
+  coarse_trigger_set.o \
+  config_params.o \
+  dedisperser.o \
+  dedisperser_state.o \
+  dedispersion_tree.o \
+  final_tree.o \
+  fine_grained_trigger_state.o \
+  ftree_transforms.o \
+  gridding.o \
+  hdf5.o \
+  json.o \
+  incbuf.o \
+  initial_tree.o \
+  lexical_cast.o \
+  misc.o \
+  online_mask_filler.o \
+  paramfile.o \
+  peak_finders.o \
+  png.o \
+  reference_dedispersion.o \
+  sparse_dedispersion.o \
+  thread_utils.o \
+  trial_sm_table.o \
+  trial_spectral_index_table.o \
+  trigger_processors.o
+
+KERNEL_HEADERS=bonsai_kernels/double_align.hpp \
+  bonsai_kernels/incbuf.hpp \
+  bonsai_kernels/itree.hpp \
+  bonsai_kernels/peak_finding.hpp \
+  bonsai_kernels/read_wt.hpp \
+  bonsai_kernels/reduce_max.hpp \
+  bonsai_kernels/update_tm.hpp \
+  bonsai_kernels/write_tv.hpp
+
+EXAMPLES_CPP=examples_cpp/example1 \
+  examples_cpp/example2 \
+  examples_cpp/example3
+
+ifeq ($(HAVE_SIMPULSE),y)
+	CPP += -DHAVE_SIMPULSE
+	LIBSIMPULSE = -lsimpulse
+endif
+
+ifeq ($(HAVE_PNG),y)
+	CPP += -DHAVE_PNG
+endif
+
+ifeq ($(HAVE_HDF5),y)
+	CPP += -DHAVE_HDF5
+endif
+
+ifeq ($(HAVE_JSONCPP),y)
+	CPP += -DHAVE_JSONCPP
+endif
+
+# for 'make clean'
+CYTHON_OUTPUTS=python/bonsai/libbonsai_wrapper.cpp python/bonsai/libbonsai_wrapper.h
+
+UNITTESTS=$(UNIT_TESTS_CPP) $(UNIT_TESTS_PYTHON)
+UNITTEST_TOUCHFILES=$(addprefix unittest_touchfiles/ut_,$(UNITTESTS))
+
+.SECONDARY: python/bonsai/libbonsai_wrapper.cpp python/bonsai/libbonsai_wrapper.h
+
+all: $(INSTALLED_BINARIES) $(LIBFILES) $(UNIT_TESTS_CPP) $(NON_INSTALLED_BINARIES) $(CYTHON_MODULE) $(EXAMPLES_CPP)
+
+test: $(LIBFILES) $(UNIT_TESTS_CPP) $(CYTHON_MODULE) $(UNITTEST_TOUCHFILES)
+
+examples: $(EXAMPLES_CPP)
+
+install: $(INCFILES) $(LIBFILES) $(INSTALLED_BINARIES) $(CYTHON_MODULE)
+	mkdir -p $(INCDIR) $(LIBDIR) $(BINDIR) $(PYDIR)/bonsai/tests $(INCDIR)/bonsai_kernels
+	cp -f $(INCFILES) $(INCDIR)/
+	cp -f $(KERNEL_HEADERS) $(INCDIR)/bonsai_kernels
+	cp -f $(LIBFILES) $(LIBDIR)/
+	cp -f $(PYMODULES) $(PYDIR)/bonsai
+	cp -f $(CYTHON_MODULE) $(PYDIR)/bonsai
+	for f in $(INSTALLED_BINARIES) $(SCRIPTS); do cp $$f $(BINDIR)/; done
+
+uninstall:
+	for f in $(INCFILES); do rm -f $(INCDIR)/$$f; done
+	for f in $(KERNEL_HEADERS); do rm -f $(INCDIR)/bonsai_kernels/$$f; done
+	for f in $(LIBFILES); do rm -f $(LIBDIR)/$$f; done
+	rm -rf $(PYDIR)/bonsai
+	rm -rf $(INCDIR)/bonsai_kernels
+	for f in $(INSTALLED_BINARIES) $(SCRIPTS); do rm -f $(BINDIR)/$$f; done
+
+clean:
+	rm -f *~ *.o *.so python/bonsai/*~ python/bonsai/*.pyc python/bonsai/*.o examples_cpp/*~ examples_cpp/*.h5 examples_cpp/*.png examples_python/*~ examples_python/*.h5 examples_python/*.png $(UNIT_TESTS_CPP) $(INSTALLED_BINARIES) $(NON_INSTALLED_BINARIES) $(UNITTEST_TOUCHFILES) $(CYTHON_OUTPUTS) $(CYTHON_MODULE) $(EXAMPLES_CPP)
+	if [ -d unittest_touchfiles ]; then rmdir unittest_touchfiles; fi
+
+%.o: %.cpp $(INCFILES) $(KERNEL_HEADERS)
+	$(CPP) -c -o $@ $<
+
+libbonsai.so: $(OFILES)
+	$(CPP) -o $@ -shared $^ $(CPP_LFLAGS) $(LIBS)
+
+python/bonsai/libbonsai_wrapper.cpp: python/bonsai/libbonsai_wrapper.pyx python/bonsai/cbonsai.pxd
+	cython --cplus python/bonsai/libbonsai_wrapper.pyx
+
+python/bonsai/libbonsai_wrapper.so: $(CYTHON_CPPFILES) $(CYTHON_INCFILES) $(INCFILES) libbonsai.so
+	$(CPP) -Wno-strict-aliasing -Wno-unused-function -I. -shared -o $@ $(CYTHON_CPPFILES) $(CPP_LFLAGS) -lbonsai $(LIBS) $(LIBS_PYMODULE)
+
+unittest_touchfiles/ut_%: %
+	mkdir -p unittest_touchfiles && ./$< && touch $@
+
+unittest_touchfiles/ut_test-dedispersion.py: $(CYTHON_MODULE)
+	mkdir -p unittest_touchfiles && ./test-dedispersion.py && touch $@
+
+bonsai-mkweight: bonsai-mkweight.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< $(CPP_LFLAGS) -lbonsai
+
+bonsai-nanny: bonsai-nanny.cpp
+	$(CPP) -o $@ $<
+
+bonsai-show-config: bonsai-show-config.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+bonsai-time-dedisperser: bonsai-time-dedisperser.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+test-misc: test-misc.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+show-running-variance-estimates: show-running-variance-estimates.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+time-transforms: time-transforms.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+time-gridding: time-gridding.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+test-anaweights: test-anaweights.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+test-itree: test-itree.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+test-incbuf: test-incbuf.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+test-kernels: test-kernels.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+test-sparse-dedispersion: test-sparse-dedispersion.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+test-ftree-transforms: test-ftree-transforms.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+test-tree: test-tree.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+examples_cpp/example1: examples_cpp/example1.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+
+examples_cpp/example2: examples_cpp/example2.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(LIBS) $(LIBSIMPULSE) $(CPP_LFLAGS)
+
+examples_cpp/example3: examples_cpp/example3.cpp $(INCFILES) libbonsai.so
+	$(CPP) -o $@ $< -lbonsai $(LIBS) $(LIBSIMPULSE) $(CPP_LFLAGS)

@@ -6,11 +6,34 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Greeting
-          command: echo Hello, world.
-      - run:
-          name: Print the Current Time
-          command: date
-      - run:
           name: Tell me about your CPUs
           command: cat /proc/cpuinfo
+      - run:
+          name: Ubuntu packages
+          command: apt install liblz4-dev libyaml-cpp-dev libboost-dev libjsoncpp-dev python-numpy libfftw3-dev libhdf5-serial-dev libzmq3-dev
+      - run:
+          name: Pip packages
+          command: pip2 install cpp-coveralls Cython pyzmq msgpack-python
+      - run:
+          name: ch_frb_io
+          command: |
+              - export LIBDIR=~/chime/lib
+              - export INCDIR=~/chime/include
+              - export BINDIR=~/chime/bin
+              - export HAVE_PSRFITS=n
+              - export HAVE_CH_FRB_IO=y
+              - export HAVE_BONSAI=y
+              - export PYDIR=~/chime/lib/python2.7/site-packages
+              - export PYTHON_INCDIR=/usr/include/python2.7
+              - export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")
+              - export JSONCPP_INC_DIR=/usr/include/jsoncpp
+              - export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages
+              - export HDF5_INC_DIR=/usr/include/hdf5/serial
+              - export HDF5_LIB_DIR=/usr/lib/x86_64-linux-gnu/hdf5/serial
+              - cd
+              - pwd
+              - git clone https://github.com/CHIMEFRB/ch_frb_io.git
+              - cd ch_frb_io
+              - ln -s site/Makefile.local.travis Makefile.local
+              - make
+              - make install

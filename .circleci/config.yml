@@ -107,7 +107,7 @@ jobs:
             cd bonsai
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
             ###
-            cp $(CIRCLE_WORKING_DIRECTORY)/bonsai-Makefile Makefile
+            cp ${CIRCLE_WORKING_DIRECTORY}/bonsai-Makefile Makefile
             ###
             make #-j4
             make install

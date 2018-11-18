@@ -31,12 +31,12 @@ jobs:
           command: pip2 install cpp-coveralls Cython pyzmq msgpack-python
 
       - run:
-        name: Setup Environment Variables
-        command: |
-          echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIBDIR}' >> $BASH_ENV
-          echo 'export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")' >> $BASH_ENV
-          echo 'export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages' >> $BASH_ENV
-          echo 'export MSGPACK_CFLAGS=-I${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include' >> $BASH_ENV
+          name: Setup Environment Variables
+          command: |
+            echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIBDIR}' >> $BASH_ENV
+            echo 'export NUMPY_INCDIR=$(python -c "import numpy; print(numpy.get_include())")' >> $BASH_ENV
+            echo 'export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages' >> $BASH_ENV
+            echo 'export MSGPACK_CFLAGS=-I${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include' >> $BASH_ENV
 
       - run:
           name: msgpack

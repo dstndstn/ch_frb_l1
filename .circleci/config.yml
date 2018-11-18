@@ -93,6 +93,7 @@ jobs:
             export LIBDIR=~/chime/lib
             export INCDIR=~/chime/include
             export BINDIR=~/chime/bin
+            export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIBDIR}
             export HAVE_PSRFITS=n
             export HAVE_CH_FRB_IO=y
             export HAVE_BONSAI=y
@@ -105,7 +106,7 @@ jobs:
             tar xzf bonsai.tgz
             cd bonsai
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
-            make -j4
+            make #-j4
             make install
       - run:
           name: rf_pipelines

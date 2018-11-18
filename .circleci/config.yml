@@ -3,19 +3,9 @@ jobs:
   build:
     docker:
       - image: ubuntu:xenial
-    environment:
-      # LIBDIR: ~/chime/lib
-      # INCDIR: ~/chime/include
-      # BINDIR: ~/chime/bin
-      HAVE_PSRFITS: n
-      HAVE_HDF5: y
-      HAVE_CH_FRB_IO: y
-      HAVE_BONSAI: y
-      HAVE_SIMPULSE: y
-      HAVE_PNG: y
-      HAVE_JSONCPP: y
-      PYDIR: ~/chime/lib/python2.7/site-packages
-      PYTHON_INCDIR: /usr/include/python2.7
+    # environment:
+    #   # ugh no this is terrible... "y" -> "true", etc
+    #   # LIBDIR: ~/chime/lib
 
     steps:
       - checkout
@@ -42,6 +32,15 @@ jobs:
             echo "export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages" >> $BASH_ENV
             echo 'export MSGPACK_CFLAGS=-I${BASE}/msgpack-2.1.0/include' >> $BASH_ENV
             echo "export MSGPACK_LFLAGS=" >> $BASH_ENV
+            echo "export HAVE_PSRFITS=n" >> $BASH_ENV
+            echo "export HAVE_HDF5=y" >> $BASH_ENV
+            echo "export HAVE_CH_FRB_IO=y" >> $BASH_ENV
+            echo "export HAVE_BONSAI=y" >> $BASH_ENV
+            echo "export HAVE_SIMPULSE=y" >> $BASH_ENV
+            echo "export HAVE_PNG=y" >> $BASH_ENV
+            echo "export HAVE_JSONCPP=y" >> $BASH_ENV
+            echo "export PYDIR=~/chime/lib/python2.7/site-packages" >> $BASH_ENV
+            echo "export PYTHON_INCDIR=/usr/include/python2.7" >> $BASH_ENV
             echo "BASH ENV:"
             cat $BASH_ENV
       - run:

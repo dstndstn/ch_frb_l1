@@ -182,7 +182,7 @@ bonsai-nanny: bonsai-nanny.cpp
 	$(CPP) -o $@ $<
 
 bonsai-show-config: bonsai-show-config.cpp $(INCFILES) libbonsai.so
-	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)
+	$(CPP) -o $@ $< -lbonsai -lrf_kernels $(CPP_LFLAGS)
 
 bonsai-time-dedisperser: bonsai-time-dedisperser.cpp $(INCFILES) libbonsai.so
 	$(CPP) -o $@ $< -lbonsai $(CPP_LFLAGS)

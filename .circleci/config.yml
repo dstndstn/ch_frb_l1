@@ -19,7 +19,7 @@ jobs:
       PYTHON_INCDIR: /usr/include/python2.7
       NUMPY_INCDIR: $(python -c "import numpy; print(numpy.get_include())")
       PYTHONPATH: ${PYTHONPATH}:/usr/lib/python2.7/dist-packages
-      MSGPACK_CFLAGS: -I$(pwd)/msgpack-2.1.0/include
+      MSGPACK_CFLAGS: -I${CIRCLE_WORKING_DIRECTORY}/msgpack-2.1.0/include
       MSGPACK_LFLAGS: 
 
     steps:

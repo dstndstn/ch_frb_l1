@@ -4,9 +4,9 @@ jobs:
     docker:
       - image: ubuntu:xenial
     environment:
-      LIBDIR: ~/chime/lib
-      INCDIR: ~/chime/include
-      BINDIR: ~/chime/bin
+      # LIBDIR: ~/chime/lib
+      # INCDIR: ~/chime/include
+      # BINDIR: ~/chime/bin
       HAVE_PSRFITS: n
       HAVE_HDF5: y
       HAVE_CH_FRB_IO: y
@@ -32,7 +32,11 @@ jobs:
       - run:
           name: Setup Environment Variables
           command: |
+            #### CIRCLE_WORKING_DIRECTORY is ~/project, which isn't always expanded into /root/project...
             echo "export BASE=${CIRCLE_WORKING_DIRECTORY}" >> $BASH_ENV
+            echo "export LIBDIR=~/chime/lib" >> $BASH_ENV
+            echo "export INCDIR=~/chime/include" >> $BASH_ENV
+            echo "export BINDIR=~/chime/bin" >> $BASH_ENV
             echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIBDIR}" >> $BASH_ENV
             echo "export NUMPY_INCDIR=$(python -c 'import numpy; print(numpy.get_include())')" >> $BASH_ENV
             echo "export PYTHONPATH=${PYTHONPATH}:/usr/lib/python2.7/dist-packages" >> $BASH_ENV

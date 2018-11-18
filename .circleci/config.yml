@@ -10,7 +10,7 @@ jobs:
           command: cat /proc/cpuinfo
       - run:
           name: Ubuntu packages
-          command: apt update && apt install -y liblz4-dev libyaml-cpp-dev libboost-dev libjsoncpp-dev python-numpy libfftw3-dev libhdf5-serial-dev libzmq3-dev python-pip git g++ make wget tar libcurl4-openssl-dev libjsoncpp-dev pkg-config
+          command: apt update && apt install -y liblz4-dev libyaml-cpp-dev libboost-dev libjsoncpp-dev python-numpy libfftw3-dev libhdf5-serial-dev libzmq3-dev python-pip git g++ make wget tar libcurl4-openssl-dev libjsoncpp-dev pkg-config libpng16-dev
       - run:
           name: Pip packages
           command: pip2 install cpp-coveralls Cython pyzmq msgpack-python
@@ -73,7 +73,7 @@ jobs:
             cd ch_frb_io
             git checkout circleci
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
-            make
+            make -j4
             make install
       - run:
           name: rf_kernels
@@ -85,6 +85,7 @@ jobs:
             git clone https://github.com/kmsmith137/rf_kernels.git
             cd rf_kernels
             ln -s site/Makefile.local.travis Makefile.local
+            make -j4
             make install
       - run:
           name: bonsai
@@ -102,7 +103,7 @@ jobs:
             export MSGPACK_CFLAGS=-I$(pwd)/msgpack-2.1.0/include
             export MSGPACK_LFLAGS=
             pwd
-            wget -O bonsai.tgz http://broiler.astrometry.net/~dstn/temp/bonsai-2018-11-18.tgz
+            wget -O bonsai.tgz http://broiler.astrometry.net/~dstn/temp/bonsai-circleci-2018-11-18.tgz
             tar xzf bonsai.tgz
             ln -s site/Makefile.local.travis Makefile.local
             make

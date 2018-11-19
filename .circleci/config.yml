@@ -8,9 +8,9 @@ jobs:
     #   # LIBDIR: ~/chime/lib
     steps:
       - add_ssh_keys:
-        fingerprints:
-          # id_circleci_bonsai
-          - "3f:0d:92:03:3c:02:89:02:2c:c7:12:96:02:38:76:06"
+          fingerprints:
+              # id_circleci_bonsai, added as a read-only Deploy Key in CHIMEFRB/bonsai
+              - "3f:0d:92:03:3c:02:89:02:2c:c7:12:96:02:38:76:06"
       - checkout
       - run:
           name: Tell me about your CPUs

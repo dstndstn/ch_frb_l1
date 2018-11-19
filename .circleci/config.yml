@@ -101,7 +101,7 @@ jobs:
             cd ch_frb_io
             git checkout circleci
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
-            make -j4
+            make -j4 || make
             make install
       - run:
           name: rf_kernels
@@ -110,7 +110,7 @@ jobs:
             git clone https://github.com/kmsmith137/rf_kernels.git
             cd rf_kernels
             ln -s site/Makefile.local.travis Makefile.local
-            make -j4
+            make -j4 || make
             make install
       - run:
           name: bonsai
@@ -119,20 +119,8 @@ jobs:
             git clone git@github.com:CHIMEFRB/bonsai.git
             cd bonsai
             git checkout circleci
-            #wget -O bonsai.tgz http://broiler.astrometry.net/~dstn/temp/bonsai-circleci-2018-11-18.tgz
-            #tar xzf bonsai.tgz
-            #cd bonsai
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
-            ###
-            #echo CIRCLE_WORKING_DIRECTORY: ${CIRCLE_WORKING_DIRECTORY}
-            #ls ${CIRCLE_WORKING_DIRECTORY}
-            #cp ${CIRCLE_WORKING_DIRECTORY}/bonsai-Makefile Makefile
-            ls ${BASE} || true
-            cp ${BASE}/bonsai-Makefile Makefile
-            ###
-            ls ~/chime/lib || true
-            echo $LD_LIBRARY_PATH
-            make #-j4
+            make -j4 || make
             make install
       - run:
           name: rf_pipelines
@@ -142,11 +130,11 @@ jobs:
             cd rf_pipelines
             git checkout circleci
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
-            make #-j4
+            make -j4 || make
             make install
       - run:
           name: ch_frb_l1
           command: |
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
-            make #-j4
+            make -j4 || make
             make install

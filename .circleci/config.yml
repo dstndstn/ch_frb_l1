@@ -6,8 +6,11 @@ jobs:
     # environment:
     #   # ugh no this is terrible... "y" -> "true", etc
     #   # LIBDIR: ~/chime/lib
-
     steps:
+      - add_ssh_keys:
+        fingerprints:
+          # id_circleci_bonsai
+          - "3f:0d:92:03:3c:02:89:02:2c:c7:12:96:02:38:76:06"
       - checkout
       - run:
           name: Tell me about your CPUs
@@ -108,9 +111,12 @@ jobs:
           name: bonsai
           command: |
             pwd
-            wget -O bonsai.tgz http://broiler.astrometry.net/~dstn/temp/bonsai-circleci-2018-11-18.tgz
-            tar xzf bonsai.tgz
+            git clone https://github.com/CHIMEFRB/bonsai.git
             cd bonsai
+            git checkout circleci
+            #wget -O bonsai.tgz http://broiler.astrometry.net/~dstn/temp/bonsai-circleci-2018-11-18.tgz
+            #tar xzf bonsai.tgz
+            #cd bonsai
             ln -s site/Makefile.local.frb-compute-0 Makefile.local
             ###
             #echo CIRCLE_WORKING_DIRECTORY: ${CIRCLE_WORKING_DIRECTORY}
